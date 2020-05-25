@@ -15,6 +15,7 @@ from draftjs_sanitizer import clean_draft_js
 from measurement.measures import Weight
 from mptt.managers import TreeManager
 from mptt.models import MPTTModel
+from postgres_copy import CopyManager
 from prices import MoneyRange
 from text_unidecode import unidecode
 from versatileimagefield.fields import PPOIField, VersatileImageField
@@ -61,6 +62,8 @@ class Category(MPTTModel, ModelWithMetadata, SeoModel):
     tree = TreeManager()
     translated = TranslationProxy()
 
+    copy_objects = CopyManager()
+
     def __str__(self) -> str:
         return self.name
 
@@ -73,6 +76,8 @@ class CategoryTranslation(SeoModelTranslation):
     name = models.CharField(max_length=128)
     description = models.TextField(blank=True)
     description_json = JSONField(blank=True, default=dict)
+
+    copy_objects = CopyManager()
 
     class Meta:
         unique_together = (("language_code", "category"),)
@@ -99,6 +104,8 @@ class ProductType(ModelWithMetadata):
     weight = MeasurementField(
         measurement=Weight, unit_choices=WeightUnits.CHOICES, default=zero_weight
     )
+
+    copy_objects = CopyManager()
 
     class Meta:
         ordering = ("slug",)
@@ -294,6 +301,8 @@ class Product(SeoModel, ModelWithMetadata, PublishableModel):
     objects = ProductsQueryset.as_manager()
     translated = TranslationProxy()
 
+    copy_objects = CopyManager()
+
     class Meta:
         app_label = "product"
         ordering = ("name",)
@@ -367,6 +376,8 @@ class ProductTranslation(SeoModelTranslation):
     description_json = SanitizedJSONField(
         blank=True, default=dict, sanitizer=clean_draft_js
     )
+
+    copy_objects = CopyManager()
 
     class Meta:
         unique_together = (("language_code", "product"),)
@@ -456,6 +467,8 @@ class ProductVariant(ModelWithMetadata):
     objects = ProductVariantQueryset.as_manager()
     translated = TranslationProxy()
 
+    copy_objects = CopyManager()
+
     class Meta:
         ordering = ("sku",)
         app_label = "product"
@@ -519,6 +532,8 @@ class ProductVariantTranslation(models.Model):
 
     translated = TranslationProxy()
 
+    copy_objects = CopyManager()
+
     class Meta:
         unique_together = (("language_code", "product_variant"),)
 
@@ -548,6 +563,8 @@ class DigitalContent(ModelWithMetadata):
     max_downloads = models.IntegerField(blank=True, null=True)
     url_valid_days = models.IntegerField(blank=True, null=True)
 
+    copy_objects = CopyManager()
+
     def create_new_url(self) -> "DigitalContentUrl":
         return self.urls.create()
 
@@ -566,6 +583,8 @@ class DigitalContentUrl(models.Model):
         null=True,
         on_delete=models.CASCADE,
     )
+
+    copy_objects = CopyManager()
 
     def save(
         self, force_insert=False, force_update=False, using=None, update_fields=None
@@ -597,6 +616,8 @@ class BaseAssignedAttribute(models.Model):
     assignment = None
     values = models.ManyToManyField("AttributeValue")
 
+    copy_objects = CopyManager()
+
     class Meta:
         abstract = True
 
@@ -619,6 +640,8 @@ class AssignedProductAttribute(BaseAssignedAttribute):
         "AttributeProduct", on_delete=models.CASCADE, related_name="productassignments"
     )
 
+    copy_objects = CopyManager()
+
     class Meta:
         unique_together = (("product", "assignment"),)
 
@@ -632,6 +655,8 @@ class AssignedVariantAttribute(BaseAssignedAttribute):
     assignment = models.ForeignKey(
         "AttributeVariant", on_delete=models.CASCADE, related_name="variantassignments"
     )
+
+    copy_objects = CopyManager()
 
     class Meta:
         unique_together = (("variant", "assignment"),)
@@ -659,6 +684,8 @@ class AttributeProduct(SortableModel):
 
     objects = AssociatedAttributeQuerySet.as_manager()
 
+    copy_objects = CopyManager()
+
     class Meta:
         unique_together = (("attribute", "product_type"),)
         ordering = ("sort_order",)
@@ -683,6 +710,8 @@ class AttributeVariant(SortableModel):
     )
 
     objects = AssociatedAttributeQuerySet.as_manager()
+
+    copy_objects = CopyManager()
 
     class Meta:
         unique_together = (("attribute", "product_type"),)
@@ -765,6 +794,8 @@ class Attribute(ModelWithMetadata):
     objects = AttributeQuerySet.as_manager()
     translated = TranslationProxy()
 
+    copy_objects = CopyManager()
+
     class Meta:
         ordering = ("storefront_search_position", "slug")
 
@@ -781,6 +812,8 @@ class AttributeTranslation(models.Model):
         Attribute, related_name="translations", on_delete=models.CASCADE
     )
     name = models.CharField(max_length=100)
+
+    copy_objects = CopyManager()
 
     class Meta:
         unique_together = (("language_code", "attribute"),)
@@ -808,6 +841,8 @@ class AttributeValue(SortableModel):
 
     translated = TranslationProxy()
 
+    copy_objects = CopyManager()
+
     class Meta:
         ordering = ("sort_order", "id")
         unique_together = ("slug", "attribute")
@@ -829,6 +864,8 @@ class AttributeValueTranslation(models.Model):
         AttributeValue, related_name="translations", on_delete=models.CASCADE
     )
     name = models.CharField(max_length=100)
+
+    copy_objects = CopyManager()
 
     class Meta:
         unique_together = (("language_code", "attribute_value"),)
@@ -854,6 +891,8 @@ class ProductImage(SortableModel):
     ppoi = PPOIField()
     alt = models.CharField(max_length=128, blank=True)
 
+    copy_objects = CopyManager()
+
     class Meta:
         ordering = ("sort_order",)
         app_label = "product"
@@ -870,6 +909,8 @@ class VariantImage(models.Model):
         ProductImage, related_name="variant_images", on_delete=models.CASCADE
     )
 
+    copy_objects = CopyManager()
+
 
 class CollectionProduct(SortableModel):
     collection = models.ForeignKey(
@@ -878,6 +919,8 @@ class CollectionProduct(SortableModel):
     product = models.ForeignKey(
         Product, related_name="collectionproduct", on_delete=models.CASCADE
     )
+
+    copy_objects = CopyManager()
 
     class Meta:
         unique_together = (("collection", "product"),)
@@ -905,6 +948,8 @@ class Collection(SeoModel, ModelWithMetadata, PublishableModel):
 
     translated = TranslationProxy()
 
+    copy_objects = CopyManager()
+
     class Meta:
         ordering = ("slug",)
 
@@ -920,6 +965,8 @@ class CollectionTranslation(SeoModelTranslation):
     name = models.CharField(max_length=128)
     description = models.TextField(blank=True)
     description_json = JSONField(blank=True, default=dict)
+
+    copy_objects = CopyManager()
 
     class Meta:
         unique_together = (("language_code", "collection"),)
