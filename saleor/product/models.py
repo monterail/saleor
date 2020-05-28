@@ -105,6 +105,7 @@ class ProductType(ModelWithMetadata):
         measurement=Weight, unit_choices=WeightUnits.CHOICES, default=zero_weight
     )
 
+    objects = models.Manager()
     copy_objects = CopyManager()
 
     class Meta:
@@ -641,6 +642,7 @@ class AssignedProductAttribute(BaseAssignedAttribute):
     )
 
     copy_objects = CopyManager()
+    objects = models.Manager()
 
     class Meta:
         unique_together = (("product", "assignment"),)
@@ -657,6 +659,7 @@ class AssignedVariantAttribute(BaseAssignedAttribute):
     )
 
     copy_objects = CopyManager()
+    objects = models.Manager()
 
     class Meta:
         unique_together = (("variant", "assignment"),)
@@ -842,6 +845,7 @@ class AttributeValue(SortableModel):
     translated = TranslationProxy()
 
     copy_objects = CopyManager()
+    objects = models.Manager()
 
     class Meta:
         ordering = ("sort_order", "id")
@@ -921,6 +925,7 @@ class CollectionProduct(SortableModel):
     )
 
     copy_objects = CopyManager()
+    objects = models.Manager()
 
     class Meta:
         unique_together = (("collection", "product"),)
@@ -949,6 +954,7 @@ class Collection(SeoModel, ModelWithMetadata, PublishableModel):
     translated = TranslationProxy()
 
     copy_objects = CopyManager()
+    objects = models.Manager()
 
     class Meta:
         ordering = ("slug",)
@@ -967,6 +973,7 @@ class CollectionTranslation(SeoModelTranslation):
     description_json = JSONField(blank=True, default=dict)
 
     copy_objects = CopyManager()
+    objects = models.Manager()
 
     class Meta:
         unique_together = (("language_code", "collection"),)
